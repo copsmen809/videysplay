@@ -3,18 +3,18 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    // Menangkap ID video dari format /ID.mp4
+    // Menangkap ID video (contoh: vid7me.com/tfKo52ZY1.mp4)
     const match = path.match(/\/([^\/]+)\.mp4$/);
 
     if (match) {
       const videoId = match[1];
-      // Gunakan link original Videy
-      const originalUrl = `https://videy.co/v/?id=${videoId}`;
       
-      // Ambil file videonya langsung (Proxying)
-      const videoResponse = await fetch(`https://cdn.videy.co/${videoId}.mp4`);
+      // Ambil video dari CDN Slicedrive menggunakan ID yang sama dengan Videy
+      const targetUrl = `https://cdn2.slicedrive.com/${videoId}.mp4`;
 
-      // Buat response baru dengan header agar bisa di-embed di X/Twitter
+      const videoResponse = await fetch(targetUrl);
+
+      // Bungkus lagi biar X/Twitter melihat ini murni dari domain kamu
       const response = new Response(videoResponse.body, videoResponse);
       response.headers.set("Access-Control-Allow-Origin", "*");
       response.headers.set("Content-Type", "video/mp4");
@@ -23,6 +23,6 @@ export default {
       return response;
     }
 
-    return new Response("Server Aktif - vid7me.com", { status: 200 });
+    return new Response("Server Proxy Ready - vid7me.com", { status: 200 });
   }
 };
