@@ -23,6 +23,9 @@ export default {
       return response;
     }
 
-    return new Response("Server Proxy Ready - vid7me.com", { status: 200 });
+    return new Response(`Server Proxy Ready - ${hostname}`, { 
+      status: 200,
+      headers: { "content-type": "text/plain" }
+    });
   }
 };
