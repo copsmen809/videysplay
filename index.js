@@ -1,31 +1,25 @@
 export default {
-  async fetch(request) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const path = url.pathname;
+    const pathname = url.pathname;
 
-    // Menangkap ID video (contoh: vid7me.com/tfKo52ZY1.mp4)
-    const match = path.match(/\/([^\/]+)\.mp4$/);
-
-    if (match) {
-      const videoId = match[1];
-      
-      // Ambil video dari CDN Slicedrive menggunakan ID yang sama dengan Videy
-      const targetUrl = `https://cdn2.slicedrive.com/${videoId}.mp4`;
-
-      const videoResponse = await fetch(targetUrl);
-
-      // Bungkus lagi biar X/Twitter melihat ini murni dari domain kamu
-      const response = new Response(videoResponse.body, videoResponse);
-      response.headers.set("Access-Control-Allow-Origin", "*");
-      response.headers.set("Content-Type", "video/mp4");
-      response.headers.set("Content-Disposition", "inline");
-
-      return response;
+    // Jika mengakses halaman utama (https://cdn2.slirpdrive.com/)
+    if (pathname === '/' || pathname === '') {
+      return new Response('cdn2.slirpdrive.com - CDN Mirror Service is Active.', {
+        status: 200,
+        headers: { 'content-type': 'text/plain' }
+      });
     }
 
-    return new Response(`Server Proxy Ready - ${hostname}`, { 
-      status: 200,
-      headers: { "content-type": "text/plain" }
-    });
-  }
+    // Ambil nama file beserta ekstensinya (menghilangkan tanda "/" di depan)
+    // Contoh: "/16fca76a2.mp4" menjadi "16fca76a2.mp4"
+    const fileName = pathname.substring(1);
+
+    // Gabungkan ke format default aceimg.com dengan parameter ?f=
+    // Hasil: https://aceimg.com/upload/?f=16fca76a2.mp4
+    const targetUrl = `https://aceimg.com/upload/?f=${fileName}`;
+
+    // Lakukan redirect 302 ke halaman default aceimg
+    return Response.redirect(targetUrl, 302);
+  },
 };
