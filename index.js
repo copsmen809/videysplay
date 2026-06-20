@@ -5,7 +5,7 @@ export default {
 
     // Jika mengakses halaman utama (https://cdn2.slirpdrive.com/)
     if (pathname === '/' || pathname === '') {
-      return new Response('cdn2.slirpdrive.com - CDN Mirror Service is Active.', {
+      return new Response('cdn2.vid7me.com - CDN Mirror Service is Active.', {
         status: 200,
         headers: { 'content-type': 'text/plain' }
       });
