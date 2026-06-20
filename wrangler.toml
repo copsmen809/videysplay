@@ -1,3 +1,10 @@
 name = "videysplay"
 main = "index.js"
-compatibility_date = "2026-05-03"
+compatibility_date = "2026-06-20"
+
+[[routes]]
+pattern = "cdn2.vid7me.com"
+custom_domain = true
+
+[vars]
+# Tempat environment variabel jika nanti dibutuhkan
