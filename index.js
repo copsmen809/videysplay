@@ -1,25 +1,37 @@
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const pathname = url.pathname;
+    
+    // 1. Ambil path lengkap (misal: /kodeunik.mp4) dari request yang masuk
+    const path = url.pathname;
+    const searchParams = url.search; // Mengambil query string jika ada (?start=... dll)
 
-    // Jika mengakses halaman utama (https://cdn2.slirpdrive.com/)
-    if (pathname === '/' || pathname === '') {
-      return new Response('cdn2.vid7me.com - CDN Mirror Service is Active.', {
-        status: 200,
-        headers: { 'content-type': 'text/plain' }
-      });
+    // 2. Susun URL tujuan baru langsung ke target Slicedrive menggunakan path yang sama
+    const targetUrl = `https://cdn2.slicedrive.com${path}${searchParams}`;
+
+    // 3. Buat request baru untuk menembak ke cdn2.slicedrive.com
+    const modifiedRequest = new Request(targetUrl, {
+      method: request.method,
+      headers: request.headers,
+      body: request.body,
+      redirect: 'follow' // Mengikuti jika dari sisi Slicedrive ada redirect internal
+    });
+
+    try {
+      // 4. Ambil data video/file dari Slicedrive
+      const response = await fetch(modifiedRequest);
+
+      // 5. Salin response untuk dikirim kembali ke pengunjung
+      const newResponse = new Response(response.body, response);
+      
+      // 6. Tambahkan atau perbarui header CORS agar video lancar saat di-embed/di-play
+      newResponse.headers.set('Access-Control-Allow-Origin', '*');
+      newResponse.headers.set('Access-Control-Allow-Methods', 'GET, HEAD, POST, OPTIONS');
+      newResponse.headers.set('Access-Control-Allow-Headers', '*');
+      
+      return newResponse;
+    } catch (error) {
+      return new Response('Error fetching video from storage source.', { status: 500 });
     }
-
-    // Ambil nama file beserta ekstensinya (menghilangkan tanda "/" di depan)
-    // Contoh: "/16fca76a2.mp4" menjadi "16fca76a2.mp4"
-    const fileName = pathname.substring(1);
-
-    // Gabungkan ke format default aceimg.com dengan parameter ?f=
-    // Hasil: https://aceimg.com/upload/?f=16fca76a2.mp4
-    const targetUrl = `https://aceimg.com/upload/?f=${fileName}`;
-
-    // Lakukan redirect 302 ke halaman default aceimg
-    return Response.redirect(targetUrl, 302);
   },
 };
